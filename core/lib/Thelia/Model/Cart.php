@@ -10,7 +10,6 @@ use Thelia\Core\Event\TheliaEvents;
 use Thelia\Model\Base\Cart as BaseCart;
 use Thelia\Model\Country;
 use Thelia\Model\State;
-use Thelia\TaxEngine\Calculator;
 
 class Cart extends BaseCart
 {
@@ -128,6 +127,7 @@ class Cart extends BaseCart
 
         if ($discount) {
             $total -= $this->getDiscount();
+
             if ($total < 0) {
                 $total = 0;
             }
@@ -140,27 +140,23 @@ class Cart extends BaseCart
      *
      * @see getTaxedAmount same as this method but the amount is without taxes
      * @param  bool         $discount
-     * @param  Country      $country
-     * @param  State|null   $state
      * @return float|int
      */
-    public function getTotalAmount($discount = true, Country $country = null, State $state = null)
+    public function getTotalAmount($discount = true)
     {
         $total = 0;
 
         foreach ($this->getCartItems() as $cartItem) {
             $subtotal = $cartItem->getRealPrice();
+
             $subtotal *= $cartItem->getQuantity();
 
             $total += $subtotal;
         }
 
-        if ($discount && $this->countCartItems() > 0) {
-            $taxCalculator = new Calculator();
-
-            $untaxedDiscount = $taxCalculator->load($cartItem->getProduct(), $country, $state)->getUntaxedPrice($this->getDiscount());
-
-            $total -= $untaxedDiscount;
+        if ($discount) {
+            // discount value is taxed see ISSUE #1476
+            $total -= $this->getDiscount();
 
             if ($total < 0) {
                 $total = 0;
@@ -176,7 +172,7 @@ class Cart extends BaseCart
      */
     public function getTotalVAT($taxCountry, $taxState = null)
     {
-        return ($this->getTaxedAmount($taxCountry) - $this->getTotalAmount(true, $taxCountry, $taxState));
+        return ($this->getTaxedAmount($taxCountry, true, $taxState) - $this->getTotalAmount(true));
     }
 
     /**
