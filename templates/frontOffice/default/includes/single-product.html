@@ -46,7 +46,7 @@
                 {* List of condition : NewCondition, DamagedCondition, UsedCondition, RefurbishedCondition *}
                 {*<meta itemprop="itemCondition" itemscope itemtype="http://schema.org/NewCondition">*}
                 {* List of currency : The currency used to describe the product price, in three-letter ISO format. *}
-                <meta itemprop="priceCurrency" content="{currency attr="symbol"}">
+                <meta itemprop="priceCurrency" content="{currency attr="code"}">
                 <link itemprop="availability" href="{$current_stock_href}" content="{$current_stock_content}" />
                 {if $IS_PROMO }
 
